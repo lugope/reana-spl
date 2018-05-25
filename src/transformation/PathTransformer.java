@@ -12,12 +12,18 @@ import parsing.activitydiagrams.Edge;
 public class PathTransformer {
 	
 	private Map<String, State> stateByActID;
+	private FDTMC fdtmc;
+	private State errorState;
+	private State sourceState;
 	
-	public PathTransformer() {
+	public PathTransformer(FDTMC fdtmc, State sourceState, State errorState) {
 		stateByActID = new HashMap<String, State>();
+		this.fdtmc = fdtmc;
+		this.errorState = errorState;
+		this.sourceState = sourceState;
 	}
 	
-	public void transformPath(FDTMC fdtmc, State sourceState, State errorState, Edge adEdge) {
+	public void transformPath(Edge adEdge) {
 		Activity targetAct = adEdge.getTarget();
 		Activity sourceAct = adEdge.getSource();
 		State targetState;
@@ -26,7 +32,7 @@ public class PathTransformer {
 
 		if (sourceAct.getType().equals(ActivityType.INITIAL_NODE)) {
 			for (Edge e : targetAct.getOutgoing()) {
-				transformPath(fdtmc, sourceState, errorState, e);
+				transformPath(e);
 			}
 		} else if (sourceAct.getType().equals(ActivityType.CALL)) {
 			stateByActID.put(sourceAct.getId(), sourceState); // insere source no hashmap
@@ -41,10 +47,12 @@ public class PathTransformer {
 				else targetState = fdtmc.createState();
 
                 fdtmc.createInterface(sourceActivitySD, sourceState, targetState, errorState);
-
+                
+                this.sourceState = targetState;
+                
 				/* continue path */
 				for (Edge e : targetAct.getOutgoing()) {
-					transformPath(fdtmc, targetState, errorState, e);
+					transformPath(e);
 				}
 			} else { // atividade target ja foi criada
 			    fdtmc.createInterface(sourceActivitySD, sourceState, targetState, errorState);
@@ -64,9 +72,11 @@ public class PathTransformer {
 
 				fdtmc.createTransition(sourceState, targetState, "", Float.toString(adEdge.getProbability()));
 
+				this.sourceState = targetState;
+				
 				/* continue path */
 				for (Edge e : targetAct.getOutgoing()) {
-					transformPath(fdtmc, targetState, errorState, e);
+					transformPath(e);
 				}
 			} else { // atividade target ja foi criada
 				fdtmc.createTransition(sourceState, targetState, "", Float.toString(adEdge.getProbability()));
@@ -86,9 +96,11 @@ public class PathTransformer {
 
 				fdtmc.createTransition(sourceState, targetState, sourceAct.getName(), "1.0");
 
+				this.sourceState = targetState;
+				
 				/* continue path */
 				for (Edge e : targetAct.getOutgoing()) {
-					transformPath(fdtmc, targetState, errorState, e);
+					transformPath(e);
 				}
 			} else { // atividade target ja foi criada
 				fdtmc.createTransition(sourceState, targetState, sourceAct.getName(), "1.0");

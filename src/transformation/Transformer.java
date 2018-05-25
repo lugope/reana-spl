@@ -30,7 +30,6 @@ public class Transformer {
 
 	private Map<String, FDTMC> fdtmcByName;
 	private Map<String, Integer> nCallsByName;
-	private PathTransformer pathTransformer;
 	private int parNum;
 	private int loopNum;
 
@@ -39,7 +38,6 @@ public class Transformer {
 	public Transformer () {
 		fdtmcByName = new HashMap<String, FDTMC>();
 		nCallsByName = new HashMap<String, Integer>();
-		pathTransformer = new PathTransformer();
 	}
 
 	// Relevant public methods
@@ -403,7 +401,8 @@ public class Transformer {
 	 * @param adEdge
 	 */
 	private void transformPath(FDTMC fdtmc, State sourceState, State errorState, Edge adEdge) {
-		pathTransformer.transformPath(fdtmc,sourceState,errorState,adEdge);
+		PathTransformer pathTransformer = new PathTransformer(fdtmc ,sourceState ,errorState);
+		pathTransformer.transformPath(adEdge);
 	}
 
 	// Effort measurement methods

@@ -5,3 +5,4 @@ regions.tex
 states
 *.dot
 *~
+*.log
